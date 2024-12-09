@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/DigitialTwin/static/css/main.a1eb1b5d.css",
+    "main.js": "/DigitialTwin/static/js/main.19646b89.js",
+    "index.html": "/DigitialTwin/index.html",
+    "main.a1eb1b5d.css.map": "/DigitialTwin/static/css/main.a1eb1b5d.css.map",
+    "main.19646b89.js.map": "/DigitialTwin/static/js/main.19646b89.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.a1eb1b5d.css",
+    "static/js/main.19646b89.js"
+  ]
+}

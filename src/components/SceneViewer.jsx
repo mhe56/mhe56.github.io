@@ -3,7 +3,7 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Html } from '@react-three/drei';
 
 const Model = () => {
-  const gltf = useGLTF('/3d_model.glb'); // Ensure your model is in the public directory
+  const gltf = useGLTF('/3D_model.glb'); // Ensure your model is in the public directory
   return <primitive object={gltf.scene} scale={[1, 1, 1]} />;
 };
 

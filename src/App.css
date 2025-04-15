@@ -1,3 +1,16 @@
+/* Remove default body margins and hide overflow */
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+#root {
+  height: 100vh;
+  width: 100vw;
+}
+
+
 .App {
   text-align: center;
 }

@@ -49,7 +49,7 @@ const Dashboard = () => {
       <WarningCard message="WARNING: social distancing is being violated (1 meter rule)" />
 
       {/* Arduino Button */}
-      <a href="https://app.arduino.cc/dashboards" target="_blank" rel="noopener noreferrer">
+      <a href="https://app.arduino.cc/dashboards/f6f7ff24-2f0f-440d-b140-acef8df76cf2" target="_blank" rel="noopener noreferrer">
         <div style={{ ...boxStyle, justifyContent: 'center' }}>
           <button
             style={{

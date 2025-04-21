@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaUserFriends, FaExclamationTriangle, FaSmile, FaDownload, FaSnowflake, FaMobileAlt, FaUsers } from 'react-icons/fa';
+import { FaUserFriends, FaExclamationTriangle, FaSmile, FaDownload, FaSnowflake, FaMobileAlt, FaUsers, FaPowerOff } from 'react-icons/fa';
 
 const boxStyle = {
   backgroundColor: '#ffffff',
@@ -53,11 +53,51 @@ const Dashboard = () => {
     attendance: 'N/A'
   });
 
+  const [features, setFeatures] = useState({
+    covid: false,
+    phone: false,
+    attendance: false,
+    registered_students: 0
+  });
+
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  const initializeSystem = async () => {
+    try {
+      console.log('Initializing system with features:', features);
+      const response = await fetch('http://localhost:5000/api/initialize', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          covid: features.covid,
+          phone: features.phone,
+          attendance: features.attendance,
+          registered_students: features.registered_students
+        }),
+      });
+      
+      const data = await response.json();
+      console.log('Initialization response:', data);
+      
+      if (response.ok) {
+        setIsInitialized(true);
+      } else {
+        console.error('Initialization failed:', data.error);
+      }
+    } catch (error) {
+      console.error('Error initializing system:', error);
+    }
+  };
+
   useEffect(() => {
     const fetchStatus = async () => {
       try {
+        console.log('Fetching status from backend...');
         const response = await fetch('http://localhost:5000/api/status');
         const data = await response.json();
+        console.log('Received status:', data);
         setStatus(data);
       } catch (error) {
         console.error('Error fetching status:', error);
@@ -73,8 +113,10 @@ const Dashboard = () => {
 
   const handleDownloadReport = async () => {
     try {
+      console.log('Requesting attendance report...');
       const response = await fetch('http://localhost:5000/api/report');
       const data = await response.json();
+      console.log('Received report data:', data);
       
       // Create a blob and download the report
       const blob = new Blob([data.report], { type: 'text/plain' });
@@ -86,6 +128,7 @@ const Dashboard = () => {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+      console.log('Report downloaded successfully');
     } catch (error) {
       console.error('Error downloading report:', error);
     }
@@ -121,6 +164,11 @@ const Dashboard = () => {
     });
   };
 
+  // Log state changes
+  useEffect(() => {
+    console.log('Status updated:', status);
+  }, [status]);
+
   return (
     <div
       style={{
@@ -133,6 +181,72 @@ const Dashboard = () => {
         fontFamily: 'sans-serif',
       }}
     >
+      {/* Feature Controls */}
+      <div style={boxStyle}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <input
+              type="checkbox"
+              id="covid"
+              checked={features.covid}
+              onChange={(e) => setFeatures({ ...features, covid: e.target.checked })}
+            />
+            <label htmlFor="covid">COVID Monitoring</label>
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <input
+              type="checkbox"
+              id="phone"
+              checked={features.phone}
+              onChange={(e) => setFeatures({ ...features, phone: e.target.checked })}
+            />
+            <label htmlFor="phone">Phone Detection</label>
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <input
+              type="checkbox"
+              id="attendance"
+              checked={features.attendance}
+              onChange={(e) => setFeatures({ ...features, attendance: e.target.checked })}
+            />
+            <label htmlFor="attendance">Attendance Tracking</label>
+          </div>
+          
+          {features.attendance && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <label>Registered Students:</label>
+              <input
+                type="number"
+                value={features.registered_students}
+                onChange={(e) => setFeatures({ ...features, registered_students: parseInt(e.target.value) || 0 })}
+                style={{ width: '60px', padding: '5px' }}
+              />
+            </div>
+          )}
+          
+          <button
+            onClick={initializeSystem}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: isInitialized ? '#4CAF50' : '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+            }}
+          >
+            <FaPowerOff />
+            {isInitialized ? 'System Initialized' : 'Initialize System'}
+          </button>
+        </div>
+      </div>
+
       {/* HVAC Status */}
       <div style={boxStyle}>
         <FaSnowflake size={30} color="#007bff" />

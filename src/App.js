@@ -1,6 +1,7 @@
 import React from 'react';
 import SceneViewer from './components/SceneViewer';
 import Dashboard from './components/Dashboard';
+import FeatureControls from './components/FeatureControls';
 
 function App() {
   return (
@@ -21,6 +22,9 @@ function App() {
     >
       Real-time Digital Twin
     </div>
+
+    {/* Feature Controls */}
+    <FeatureControls />
 
     {/* 3D Scene */}
     <div style={{ flex: 1 }}>

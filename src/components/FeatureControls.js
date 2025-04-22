@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function FeatureControls() {
+function FeatureControls({ onReportGenerated }) {
   const [socialDistancing, setSocialDistancing] = useState(false);
   const [phoneDetection, setPhoneDetection] = useState(false);
   const [attendance, setAttendance] = useState(false);
@@ -108,16 +108,10 @@ function FeatureControls() {
       setAttendance(false);
       setError('');
       
-      // Download the report
-      const blob = new Blob([data.report], { type: 'text/plain' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'lecture_report.txt';
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      // Show the report in the dashboard
+      if (onReportGenerated) {
+        onReportGenerated(data.report);
+      }
     } catch (err) {
       setError(err.message);
       console.error('Error stopping lecture:', err);

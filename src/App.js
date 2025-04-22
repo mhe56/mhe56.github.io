@@ -1,9 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import SceneViewer from './components/SceneViewer';
 import Dashboard from './components/Dashboard';
 import FeatureControls from './components/FeatureControls';
 
 function App() {
+  const [report, setReport] = useState('');
+
+  const handleReportGenerated = (reportText) => {
+    setReport(reportText);
+  };
+
   return (
     <div style={{ display: 'flex', width: '100vw', height: '100vh', margin: 0, padding: 0 }}>
   {/* Left Side - Scene with Header */}
@@ -24,7 +30,7 @@ function App() {
     </div>
 
     {/* Feature Controls */}
-    <FeatureControls />
+    <FeatureControls onReportGenerated={handleReportGenerated} />
 
     {/* 3D Scene */}
     <div style={{ flex: 1 }}>
@@ -70,7 +76,7 @@ function App() {
         padding: '16px',
       }}
     >
-      <Dashboard />
+      <Dashboard report={report} />
     </div>
   </div>
 </div>

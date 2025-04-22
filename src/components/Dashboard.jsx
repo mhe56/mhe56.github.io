@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaUserFriends, FaExclamationTriangle, FaSmile, FaDownload, FaSnowflake, FaMobileAlt, FaUsers } from 'react-icons/fa';
+import { FaUserFriends, FaExclamationTriangle, FaSmile, FaDownload, FaSnowflake, FaMobileAlt, FaUsers, FaFileAlt } from 'react-icons/fa';
 
 const boxStyle = {
   backgroundColor: '#ffffff',
@@ -52,6 +52,7 @@ const Dashboard = () => {
     hvac: 'N/A',
     attendance: 'N/A'
   });
+  const [report, setReport] = useState('');
 
   useEffect(() => {
     const fetchStatus = async () => {
@@ -178,6 +179,37 @@ const Dashboard = () => {
             {categorizeAlerts(status.alerts).map((alert, index) => (
               <WarningCard key={index} message={alert.message} type={alert.type} />
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Report Section */}
+      {report && (
+        <div style={boxStyle}>
+          <div style={{ width: '100%' }}>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '8px', 
+              marginBottom: '12px',
+              fontSize: '1.1rem',
+              fontWeight: 'bold'
+            }}>
+              <FaFileAlt size={20} color="#2196F3" />
+              <span>Lecture Report</span>
+            </div>
+            <div style={{
+              backgroundColor: '#f5f5f5',
+              padding: '12px',
+              borderRadius: '8px',
+              whiteSpace: 'pre-wrap',
+              fontFamily: 'monospace',
+              fontSize: '0.9rem',
+              maxHeight: '300px',
+              overflowY: 'auto'
+            }}>
+              {report}
+            </div>
           </div>
         </div>
       )}

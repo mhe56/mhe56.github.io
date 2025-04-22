@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaUserFriends, FaExclamationTriangle, FaSmile, FaDownload, FaSnowflake, FaMobileAlt, FaUsers, FaPowerOff } from 'react-icons/fa';
+import { FaUserFriends, FaExclamationTriangle, FaSmile, FaDownload, FaSnowflake, FaMobileAlt, FaUsers } from 'react-icons/fa';
 
 const boxStyle = {
   backgroundColor: '#ffffff',
@@ -53,51 +53,11 @@ const Dashboard = () => {
     attendance: 'N/A'
   });
 
-  const [features, setFeatures] = useState({
-    covid: false,
-    phone: false,
-    attendance: false,
-    registered_students: 0
-  });
-
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  const initializeSystem = async () => {
-    try {
-      console.log('Initializing system with features:', features);
-      const response = await fetch('http://localhost:5000/api/initialize', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          covid: features.covid,
-          phone: features.phone,
-          attendance: features.attendance,
-          registered_students: features.registered_students
-        }),
-      });
-      
-      const data = await response.json();
-      console.log('Initialization response:', data);
-      
-      if (response.ok) {
-        setIsInitialized(true);
-      } else {
-        console.error('Initialization failed:', data.error);
-      }
-    } catch (error) {
-      console.error('Error initializing system:', error);
-    }
-  };
-
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        console.log('Fetching status from backend...');
         const response = await fetch('http://localhost:5000/api/status');
         const data = await response.json();
-        console.log('Received status:', data);
         setStatus(data);
       } catch (error) {
         console.error('Error fetching status:', error);
@@ -113,10 +73,8 @@ const Dashboard = () => {
 
   const handleDownloadReport = async () => {
     try {
-      console.log('Requesting attendance report...');
       const response = await fetch('http://localhost:5000/api/report');
       const data = await response.json();
-      console.log('Received report data:', data);
       
       // Create a blob and download the report
       const blob = new Blob([data.report], { type: 'text/plain' });
@@ -128,7 +86,6 @@ const Dashboard = () => {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      console.log('Report downloaded successfully');
     } catch (error) {
       console.error('Error downloading report:', error);
     }
@@ -143,7 +100,7 @@ const Dashboard = () => {
 
   const getAttendanceStatus = (attendance) => {
     if (attendance === 'N/A') return 'N/A';
-    const [status, count] = attendance.split(' (');
+    const [status] = attendance.split(' (');
     return status;
   };
 
@@ -164,11 +121,6 @@ const Dashboard = () => {
     });
   };
 
-  // Log state changes
-  useEffect(() => {
-    console.log('Status updated:', status);
-  }, [status]);
-
   return (
     <div
       style={{
@@ -181,166 +133,74 @@ const Dashboard = () => {
         fontFamily: 'sans-serif',
       }}
     >
-      {/* Feature Controls */}
-      <div style={boxStyle}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <input
-              type="checkbox"
-              id="covid"
-              checked={features.covid}
-              onChange={(e) => setFeatures({ ...features, covid: e.target.checked })}
-            />
-            <label htmlFor="covid">COVID Monitoring</label>
-          </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <input
-              type="checkbox"
-              id="phone"
-              checked={features.phone}
-              onChange={(e) => setFeatures({ ...features, phone: e.target.checked })}
-            />
-            <label htmlFor="phone">Phone Detection</label>
-          </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <input
-              type="checkbox"
-              id="attendance"
-              checked={features.attendance}
-              onChange={(e) => setFeatures({ ...features, attendance: e.target.checked })}
-            />
-            <label htmlFor="attendance">Attendance Tracking</label>
-          </div>
-          
-          {features.attendance && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <label>Registered Students:</label>
-              <input
-                type="number"
-                value={features.registered_students}
-                onChange={(e) => setFeatures({ ...features, registered_students: parseInt(e.target.value) || 0 })}
-                style={{ width: '60px', padding: '5px' }}
-              />
+      {/* Status Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+        {/* Occupancy Status */}
+        <div style={boxStyle}>
+          <FaUserFriends size={24} color="#2196F3" />
+          <div>
+            <div style={{ fontSize: '0.9rem', color: '#666' }}>Occupancy</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
+              {status.num_bodies} ({getOccupancyStatus(status.num_bodies)})
             </div>
-          )}
-          
-          <button
-            onClick={initializeSystem}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: isInitialized ? '#4CAF50' : '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-            }}
-          >
-            <FaPowerOff />
-            {isInitialized ? 'System Initialized' : 'Initialize System'}
-          </button>
+          </div>
+        </div>
+
+        {/* Attendance Status */}
+        <div style={boxStyle}>
+          <FaSmile size={24} color="#4CAF50" />
+          <div>
+            <div style={{ fontSize: '0.9rem', color: '#666' }}>Attendance</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
+              {getAttendanceStatus(status.attendance)}
+            </div>
+            <div style={{ fontSize: '0.9rem', color: '#666' }}>
+              {getAttendanceCount(status.attendance)}
+            </div>
+          </div>
+        </div>
+
+        {/* HVAC Status */}
+        <div style={boxStyle}>
+          <FaSnowflake size={24} color="#00BCD4" />
+          <div>
+            <div style={{ fontSize: '0.9rem', color: '#666' }}>HVAC Status</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{status.hvac}</div>
+          </div>
         </div>
       </div>
 
-      {/* HVAC Status */}
+      {/* Alerts Section */}
+      {status.alerts.length > 0 && (
+        <div style={boxStyle}>
+          <div style={{ width: '100%' }}>
+            <div style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '12px' }}>Alerts</div>
+            {categorizeAlerts(status.alerts).map((alert, index) => (
+              <WarningCard key={index} message={alert.message} type={alert.type} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Report Download */}
       <div style={boxStyle}>
-        <FaSnowflake size={30} color="#007bff" />
-        <div>
-          <p style={{ fontSize: '1.3rem', fontWeight: 'bold', margin: 0 }}>{status.hvac}</p>
-          <p style={{ fontSize: '0.85rem', color: '#666', margin: 0 }}>HVAC Status</p>
-        </div>
-      </div>
-
-      {/* Occupancy */}
-      <div style={boxStyle}>
-        <FaUserFriends size={36} color="#007bff" />
-        <div>
-          <p style={{ fontSize: '1.3rem', fontWeight: 'bold', margin: 0 }}>{status.num_bodies}</p>
-          <p style={{ fontSize: '0.85rem', color: '#666', margin: 0 }}>{getOccupancyStatus(status.num_bodies)}</p>
-        </div>
-      </div>
-
-      {/* Attendance */}
-      <div style={boxStyle}>
-        <FaUsers size={30} color="#007bff" />
-        <div>
-          <p style={{ fontSize: '1.3rem', fontWeight: 'bold', margin: 0 }}>{getAttendanceCount(status.attendance)}</p>
-          <p style={{ fontSize: '0.85rem', color: '#666', margin: 0 }}>{getAttendanceStatus(status.attendance)}</p>
-        </div>
-      </div>
-
-      {/* Warnings */}
-      {categorizeAlerts(status.alerts).map((alert, index) => (
-        <WarningCard key={index} message={alert.message} type={alert.type} />
-      ))}
-
-      {/* Download Report Button */}
-      <div style={{ ...boxStyle, justifyContent: 'center' }}>
         <button
           onClick={handleDownloadReport}
           style={{
-            width: '100%',
             padding: '10px 20px',
-            fontSize: '1rem',
-            backgroundColor: '#007bff',
+            backgroundColor: '#2196F3',
             color: 'white',
             border: 'none',
             borderRadius: '8px',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
             gap: '8px',
           }}
         >
           <FaDownload />
           Download Attendance Report
         </button>
-      </div>
-
-      {/* Arduino Button */}
-      <a href="https://app.arduino.cc/dashboards/f6f7ff24-2f0f-440d-b140-acef8df76cf2" target="_blank" rel="noopener noreferrer">
-        <div style={{ ...boxStyle, justifyContent: 'center' }}>
-          <button
-            style={{
-              width: '100%',
-              padding: '10px 20px',
-              fontSize: '1rem',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-            }}
-          >
-            Go to Arduino Dashboard
-          </button>
-        </div>
-      </a>
-
-      {/* Major Distractions */}
-      <div style={boxStyle}>
-        <FaExclamationTriangle size={30} color="red" />
-        <div>
-          <p style={{ fontSize: '1.3rem', fontWeight: 'bold', margin: 0 }}>
-            {status.alerts.filter(alert => alert.includes('Phone usage')).length}
-          </p>
-          <p style={{ fontSize: '0.85rem', color: '#666', margin: 0 }}>Major Distractions</p>
-        </div>
-      </div>
-
-      {/* Satisfaction Score */}
-      <div style={boxStyle}>
-        <FaSmile size={30} color="green" />
-        <div>
-          <p style={{ fontSize: '1.3rem', fontWeight: 'bold', margin: 0 }}>80 / 100</p>
-          <p style={{ fontSize: '0.85rem', color: '#666', margin: 0 }}>Satisfaction Score</p>
-        </div>
       </div>
     </div>
   );

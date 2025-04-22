@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 function FeatureControls() {
   const [socialDistancing, setSocialDistancing] = useState(false);
   const [phoneDetection, setPhoneDetection] = useState(false);
-  const [distractionAnalysis, setDistractionAnalysis] = useState(false);
-  const [attendance, setAttendance] = useState('');
+  const [attendance, setAttendance] = useState(false);
+  const [registeredStudents, setRegisteredStudents] = useState('');
   const [isInitialized, setIsInitialized] = useState(false);
   const [error, setError] = useState('');
 
@@ -18,8 +18,8 @@ function FeatureControls() {
         body: JSON.stringify({
           covid: socialDistancing,
           phone: phoneDetection,
-          attendance: distractionAnalysis,
-          registered_students: attendance ? parseInt(attendance) : 0
+          attendance: attendance,
+          registered_students: registeredStudents ? parseInt(registeredStudents) : 0
         }),
       });
 
@@ -45,8 +45,8 @@ function FeatureControls() {
         body: JSON.stringify({
           covid: socialDistancing,
           phone: phoneDetection,
-          attendance: distractionAnalysis,
-          registered_students: attendance ? parseInt(attendance) : 0,
+          attendance: attendance,
+          registered_students: registeredStudents ? parseInt(registeredStudents) : 0,
           resolution: 'HD720'
         }),
       });
@@ -80,15 +80,15 @@ function FeatureControls() {
     }
   };
 
-  const handleDistractionAnalysisToggle = () => {
-    setDistractionAnalysis(!distractionAnalysis);
+  const handleAttendanceToggle = () => {
+    setAttendance(!attendance);
     if (isInitialized) {
       updateFeatures();
     }
   };
 
-  const handleAttendanceChange = (e) => {
-    setAttendance(e.target.value);
+  const handleRegisteredStudentsChange = (e) => {
+    setRegisteredStudents(e.target.value);
     if (isInitialized) {
       updateFeatures();
     }
@@ -184,14 +184,14 @@ function FeatureControls() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <label style={{ fontSize: '0.9rem', color: '#2c3e50' }}>Distraction Analysis</label>
+          <label style={{ fontSize: '0.9rem', color: '#2c3e50' }}>Attendance</label>
           <button
-            onClick={handleDistractionAnalysisToggle}
+            onClick={handleAttendanceToggle}
             style={{
               width: '40px',
               height: '20px',
               borderRadius: '10px',
-              backgroundColor: distractionAnalysis ? '#4CAF50' : '#ccc',
+              backgroundColor: attendance ? '#4CAF50' : '#ccc',
               border: 'none',
               position: 'relative',
               cursor: 'pointer',
@@ -200,7 +200,7 @@ function FeatureControls() {
             <div style={{
               position: 'absolute',
               top: '2px',
-              left: distractionAnalysis ? '22px' : '2px',
+              left: attendance ? '22px' : '2px',
               width: '16px',
               height: '16px',
               borderRadius: '50%',
@@ -211,22 +211,24 @@ function FeatureControls() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
-        <label style={{ fontSize: '0.9rem', color: '#2c3e50' }}>Attendance:</label>
-        <input
-          type="number"
-          value={attendance}
-          onChange={handleAttendanceChange}
-          style={{
-            width: '80px',
-            padding: '6px 8px',
-            borderRadius: '6px',
-            border: '1px solid #d0d0d0',
-            fontSize: '0.9rem',
-          }}
-          placeholder="0"
-        />
-      </div>
+      {attendance && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
+          <label style={{ fontSize: '0.9rem', color: '#2c3e50' }}>Registered Students:</label>
+          <input
+            type="number"
+            value={registeredStudents}
+            onChange={handleRegisteredStudentsChange}
+            style={{
+              width: '80px',
+              padding: '6px 8px',
+              borderRadius: '6px',
+              border: '1px solid #d0d0d0',
+              fontSize: '0.9rem',
+            }}
+            placeholder="0"
+          />
+        </div>
+      )}
     </div>
   );
 }

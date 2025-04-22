@@ -8,6 +8,33 @@ function FeatureControls() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [error, setError] = useState('');
 
+  const updateFeatures = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/update_features', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          covid: socialDistancing,
+          phone: phoneDetection,
+          attendance: distractionAnalysis,
+          registered_students: attendance ? parseInt(attendance) : 0
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update features');
+      }
+
+      console.log('Features updated successfully');
+    } catch (err) {
+      setError(err.message);
+      console.error('Error updating features:', err);
+    }
+  };
+
   const initializeCamera = async () => {
     try {
       const response = await fetch('http://localhost:5000/api/initialize', {
@@ -36,6 +63,34 @@ function FeatureControls() {
     } catch (err) {
       setError(err.message);
       console.error('Error initializing camera:', err);
+    }
+  };
+
+  const handleSocialDistancingToggle = () => {
+    setSocialDistancing(!socialDistancing);
+    if (isInitialized) {
+      updateFeatures();
+    }
+  };
+
+  const handlePhoneDetectionToggle = () => {
+    setPhoneDetection(!phoneDetection);
+    if (isInitialized) {
+      updateFeatures();
+    }
+  };
+
+  const handleDistractionAnalysisToggle = () => {
+    setDistractionAnalysis(!distractionAnalysis);
+    if (isInitialized) {
+      updateFeatures();
+    }
+  };
+
+  const handleAttendanceChange = (e) => {
+    setAttendance(e.target.value);
+    if (isInitialized) {
+      updateFeatures();
     }
   };
 
@@ -77,7 +132,7 @@ function FeatureControls() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <label style={{ fontSize: '0.9rem', color: '#2c3e50' }}>Social Distancing</label>
           <button
-            onClick={() => setSocialDistancing(!socialDistancing)}
+            onClick={handleSocialDistancingToggle}
             style={{
               width: '40px',
               height: '20px',
@@ -104,7 +159,7 @@ function FeatureControls() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <label style={{ fontSize: '0.9rem', color: '#2c3e50' }}>Phone Detection</label>
           <button
-            onClick={() => setPhoneDetection(!phoneDetection)}
+            onClick={handlePhoneDetectionToggle}
             style={{
               width: '40px',
               height: '20px',
@@ -131,7 +186,7 @@ function FeatureControls() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <label style={{ fontSize: '0.9rem', color: '#2c3e50' }}>Distraction Analysis</label>
           <button
-            onClick={() => setDistractionAnalysis(!distractionAnalysis)}
+            onClick={handleDistractionAnalysisToggle}
             style={{
               width: '40px',
               height: '20px',
@@ -161,7 +216,7 @@ function FeatureControls() {
         <input
           type="number"
           value={attendance}
-          onChange={(e) => setAttendance(e.target.value)}
+          onChange={handleAttendanceChange}
           style={{
             width: '80px',
             padding: '6px 8px',

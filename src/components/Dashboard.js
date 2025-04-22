@@ -1,8 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function Dashboard() {
-  const [occupancy, setOccupancy] = useState(0);
-  const [warnings, setWarnings] = useState([]);
+  const [status, setStatus] = useState({
+    num_bodies: 0,
+    alerts: [],
+    hvac: 'N/A',
+    attendance: 'N/A'
+  });
+
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/status');
+        const data = await response.json();
+        console.log('Received status:', data);
+        setStatus(data);
+      } catch (error) {
+        console.error('Error fetching status:', error);
+      }
+    };
+
+    // Fetch status every 2 seconds
+    const interval = setInterval(fetchStatus, 2000);
+    fetchStatus(); // Initial fetch
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const getOccupancyStatus = (numBodies) => {
+    if (numBodies === 0) return 'Empty';
+    if (numBodies <= 3) return 'Sparsely Occupied';
+    if (numBodies <= 6) return 'Moderately Occupied';
+    return 'Highly Occupied';
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -31,40 +61,9 @@ function Dashboard() {
           </svg>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '2rem', fontWeight: '600', color: '#2c3e50' }}>{occupancy}</div>
-          <div style={{ fontSize: '0.9rem', color: '#666' }}>Current Occupancy</div>
+          <div style={{ fontSize: '2rem', fontWeight: '600', color: '#2c3e50' }}>{status.num_bodies}</div>
+          <div style={{ fontSize: '0.9rem', color: '#666' }}>{getOccupancyStatus(status.num_bodies)}</div>
         </div>
-      </div>
-
-      {/* Arduino Dashboard Link */}
-      <div style={{
-        backgroundColor: '#ffffff',
-        borderRadius: '12px',
-        padding: '20px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-      }}>
-        <a
-          href="https://app.arduino.cc/dashboards/f6f7ff24-2f0f-440d-b140-acef8df76cf2"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            width: '100%',
-            padding: '12px',
-            borderRadius: '8px',
-            border: 'none',
-            backgroundColor: '#2196F3',
-            color: 'white',
-            fontSize: '1rem',
-            fontWeight: '500',
-            cursor: 'pointer',
-            textDecoration: 'none',
-            display: 'block',
-            textAlign: 'center',
-            transition: 'background-color 0.3s',
-          }}
-        >
-          Arduino Dashboard
-        </a>
       </div>
 
       {/* Warnings Section */}
@@ -88,12 +87,12 @@ function Dashboard() {
           borderRadius: '8px',
           padding: '12px',
         }}>
-          {warnings.length === 0 ? (
+          {status.alerts.length === 0 ? (
             <div style={{ color: '#666', textAlign: 'center', padding: '20px' }}>
               No warnings at the moment
             </div>
           ) : (
-            warnings.map((warning, index) => (
+            status.alerts.map((warning, index) => (
               <div key={index} style={{
                 padding: '8px',
                 marginBottom: '8px',
@@ -105,6 +104,66 @@ function Dashboard() {
               </div>
             ))
           )}
+        </div>
+      </div>
+
+      {/* HVAC Status */}
+      <div style={{
+        backgroundColor: '#ffffff',
+        borderRadius: '12px',
+        padding: '20px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px',
+      }}>
+        <div style={{
+          width: '40px',
+          height: '40px',
+          borderRadius: '50%',
+          backgroundColor: '#e6f0f8',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="#2c3e50"/>
+            <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" fill="#2c3e50"/>
+          </svg>
+        </div>
+        <div>
+          <div style={{ fontSize: '1.2rem', fontWeight: '600', color: '#2c3e50' }}>{status.hvac}</div>
+          <div style={{ fontSize: '0.9rem', color: '#666' }}>HVAC Status</div>
+        </div>
+      </div>
+
+      {/* Attendance Status */}
+      <div style={{
+        backgroundColor: '#ffffff',
+        borderRadius: '12px',
+        padding: '20px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px',
+      }}>
+        <div style={{
+          width: '40px',
+          height: '40px',
+          borderRadius: '50%',
+          backgroundColor: '#e6f0f8',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="#2c3e50"/>
+            <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" fill="#2c3e50"/>
+          </svg>
+        </div>
+        <div>
+          <div style={{ fontSize: '1.2rem', fontWeight: '600', color: '#2c3e50' }}>{status.attendance}</div>
+          <div style={{ fontSize: '0.9rem', color: '#666' }}>Attendance</div>
         </div>
       </div>
     </div>

@@ -5,6 +5,39 @@ function FeatureControls() {
   const [phoneDetection, setPhoneDetection] = useState(false);
   const [distractionAnalysis, setDistractionAnalysis] = useState(false);
   const [attendance, setAttendance] = useState('');
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [error, setError] = useState('');
+
+  const initializeCamera = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/initialize', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          covid: socialDistancing,
+          phone: phoneDetection,
+          attendance: distractionAnalysis,
+          registered_students: attendance ? parseInt(attendance) : 0,
+          resolution: 'HD720'
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to initialize camera');
+      }
+
+      const data = await response.json();
+      setIsInitialized(true);
+      setError('');
+      console.log('Camera initialized successfully:', data);
+    } catch (err) {
+      setError(err.message);
+      console.error('Error initializing camera:', err);
+    }
+  };
 
   return (
     <div style={{
@@ -16,6 +49,30 @@ function FeatureControls() {
       borderBottom: '1px solid #e0e0e0',
       boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
     }}>
+      {/* Initialize Button */}
+      <button
+        onClick={initializeCamera}
+        disabled={isInitialized}
+        style={{
+          padding: '8px 16px',
+          borderRadius: '6px',
+          backgroundColor: isInitialized ? '#4CAF50' : '#2196F3',
+          color: 'white',
+          border: 'none',
+          cursor: isInitialized ? 'default' : 'pointer',
+          fontWeight: '500',
+          fontSize: '0.9rem',
+        }}
+      >
+        {isInitialized ? 'Camera Initialized' : 'Initialize Camera'}
+      </button>
+
+      {error && (
+        <div style={{ color: 'red', fontSize: '0.9rem' }}>
+          {error}
+        </div>
+      )}
+
       <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <label style={{ fontSize: '0.9rem', color: '#2c3e50' }}>Social Distancing</label>

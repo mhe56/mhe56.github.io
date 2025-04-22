@@ -6,6 +6,7 @@ function FeatureControls() {
   const [attendance, setAttendance] = useState(false);
   const [registeredStudents, setRegisteredStudents] = useState('');
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isLectureActive, setIsLectureActive] = useState(false);
   const [error, setError] = useState('');
 
   const updateFeatures = async () => {
@@ -63,6 +64,63 @@ function FeatureControls() {
     } catch (err) {
       setError(err.message);
       console.error('Error initializing camera:', err);
+    }
+  };
+
+  const startLecture = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/start_lecture', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to start lecture');
+      }
+
+      setIsLectureActive(true);
+      setError('');
+    } catch (err) {
+      setError(err.message);
+      console.error('Error starting lecture:', err);
+    }
+  };
+
+  const stopLecture = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/stop_lecture', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to stop lecture');
+      }
+
+      const data = await response.json();
+      setIsLectureActive(false);
+      setAttendance(false);
+      setError('');
+      
+      // Download the report
+      const blob = new Blob([data.report], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'lecture_report.txt';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      setError(err.message);
+      console.error('Error stopping lecture:', err);
     }
   };
 
@@ -211,7 +269,7 @@ function FeatureControls() {
         </div>
       </div>
 
-      {attendance && (
+      {attendance && !isLectureActive && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
           <label style={{ fontSize: '0.9rem', color: '#2c3e50' }}>Registered Students:</label>
           <input
@@ -227,7 +285,41 @@ function FeatureControls() {
             }}
             placeholder="0"
           />
+          <button
+            onClick={startLecture}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '6px',
+              backgroundColor: '#4CAF50',
+              color: 'white',
+              border: 'none',
+              cursor: 'pointer',
+              fontWeight: '500',
+              fontSize: '0.9rem',
+            }}
+          >
+            Start Lecture
+          </button>
         </div>
+      )}
+
+      {isLectureActive && (
+        <button
+          onClick={stopLecture}
+          style={{
+            padding: '8px 16px',
+            borderRadius: '6px',
+            backgroundColor: '#f44336',
+            color: 'white',
+            border: 'none',
+            cursor: 'pointer',
+            fontWeight: '500',
+            fontSize: '0.9rem',
+            marginLeft: 'auto',
+          }}
+        >
+          Stop Lecture
+        </button>
       )}
     </div>
   );

@@ -7,24 +7,45 @@ function Dashboard() {
     hvac: 'N/A',
     attendance: 'N/A'
   });
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchStatus = async () => {
+      if (isLoading) return;
+      
       try {
+        setIsLoading(true);
         const response = await fetch('http://localhost:5000/api/status');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
-        console.log('Received status:', data);
-        setStatus(data);
+        if (isMounted) {
+          setStatus(data);
+          setError(null);
+        }
       } catch (error) {
-        console.error('Error fetching status:', error);
+        if (isMounted) {
+          setError(error.message);
+          console.error('Error fetching status:', error);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
-    // Fetch status every 2 seconds
-    const interval = setInterval(fetchStatus, 2000);
+    // Fetch status every 5 seconds instead of 2
+    const interval = setInterval(fetchStatus, 5000);
     fetchStatus(); // Initial fetch
 
-    return () => clearInterval(interval);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const getOccupancyStatus = (numBodies) => {
@@ -36,6 +57,18 @@ function Dashboard() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      {error && (
+        <div style={{
+          backgroundColor: '#ffebee',
+          color: '#c62828',
+          padding: '12px',
+          borderRadius: '8px',
+          marginBottom: '16px'
+        }}>
+          Error: {error}
+        </div>
+      )}
+
       {/* Occupancy Card */}
       <div style={{
         backgroundColor: '#ffffff',

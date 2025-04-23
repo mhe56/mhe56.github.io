@@ -10,29 +10,42 @@ function FeatureControls({ onReportGenerated }) {
   const [error, setError] = useState('');
 
   const updateFeatures = async () => {
+    if (!isInitialized) return;
+    
     try {
-      const response = await fetch('http://localhost:5000/api/update_features', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          covid: socialDistancing,
-          phone: phoneDetection,
-          attendance: attendance,
-          registered_students: registeredStudents ? parseInt(registeredStudents) : 0
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update features');
-      }
-
-      console.log('Features updated successfully');
-    } catch (err) {
-      setError(err.message);
-      console.error('Error updating features:', err);
+        const requestData = {
+            phone: phoneDetection,
+            covid: socialDistancing,
+            attendance: attendance,
+            registered_students: registeredStudents
+        };
+        console.log('Sending feature update request:', requestData);
+        
+        const response = await fetch('http://localhost:5000/api/update_features', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Feature update failed:', errorData);
+            throw new Error(errorData.error || 'Failed to update features');
+        }
+        
+        const data = await response.json();
+        console.log('Feature update response:', data);
+        
+        if (data.status !== 'success') {
+            throw new Error('Unexpected response from server');
+        }
+    } catch (error) {
+        console.error('Error updating features:', error);
+        // Revert the state on error
+        setPhoneDetection(prev => !prev);
+        alert('Failed to update phone detection. Please try again.');
     }
   };
 

@@ -17,7 +17,7 @@ function FeatureControls({ onReportGenerated }) {
             phone: phoneDetection,
             covid: socialDistancing,
             attendance: attendance,
-            registered_students: registeredStudents
+            registered_students: registeredStudents ? parseInt(registeredStudents) : 0
         };
         console.log('Sending feature update request:', requestData);
         

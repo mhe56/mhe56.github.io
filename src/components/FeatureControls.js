@@ -9,53 +9,30 @@ function FeatureControls({ onReportGenerated }) {
   const [isLectureActive, setIsLectureActive] = useState(false);
   const [error, setError] = useState('');
 
-  const updateFeatures = async (changedFeature) => {
-    if (!isInitialized) return;
-    
+  const updateFeatures = async () => {
     try {
-        // Only include the feature that was changed
-        const requestData = {
-            [changedFeature]: {
-                'phone': phoneDetection,
-                'covid': socialDistancing,
-                'attendance': attendance,
-                'registered_students': registeredStudents ? parseInt(registeredStudents) : 0
-            }[changedFeature]
-        };
-        
-        console.log('Sending feature update request:', requestData);
-        
-        const response = await fetch('http://localhost:5000/api/update_features', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestData)
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Feature update failed:', errorData);
-            throw new Error(errorData.error || 'Failed to update features');
-        }
-        
-        const data = await response.json();
-        console.log('Feature update response:', data);
-        
-        if (data.status !== 'success') {
-            throw new Error('Unexpected response from server');
-        }
-    } catch (error) {
-        console.error('Error updating features:', error);
-        // Revert the state on error
-        if (changedFeature === 'phone') {
-            setPhoneDetection(prev => !prev);
-        } else if (changedFeature === 'covid') {
-            setSocialDistancing(prev => !prev);
-        } else if (changedFeature === 'attendance') {
-            setAttendance(prev => !prev);
-        }
-        alert(`Failed to update ${changedFeature}. Please try again.`);
+      const response = await fetch('http://localhost:5000/api/update_features', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          covid: socialDistancing,
+          phone: phoneDetection,
+          attendance: attendance,
+          registered_students: registeredStudents ? parseInt(registeredStudents) : 0
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update features');
+      }
+
+      console.log('Features updated successfully');
+    } catch (err) {
+      setError(err.message);
+      console.error('Error updating features:', err);
     }
   };
 
@@ -141,34 +118,31 @@ function FeatureControls({ onReportGenerated }) {
     }
   };
 
-  const handleSocialDistancingToggle = async () => {
-    const newValue = !socialDistancing;
-    setSocialDistancing(newValue);
+  const handleSocialDistancingToggle = () => {
+    setSocialDistancing(!socialDistancing);
     if (isInitialized) {
-      await updateFeatures('covid');
+      updateFeatures();
     }
   };
 
-  const handlePhoneDetectionToggle = async () => {
-    const newValue = !phoneDetection;
-    setPhoneDetection(newValue);
+  const handlePhoneDetectionToggle = () => {
+    setPhoneDetection(!phoneDetection);
     if (isInitialized) {
-      await updateFeatures('phone');
+      updateFeatures();
     }
   };
 
-  const handleAttendanceToggle = async () => {
-    const newValue = !attendance;
-    setAttendance(newValue);
+  const handleAttendanceToggle = () => {
+    setAttendance(!attendance);
     if (isInitialized) {
-      await updateFeatures('attendance');
+      updateFeatures();
     }
   };
 
-  const handleRegisteredStudentsChange = async (e) => {
+  const handleRegisteredStudentsChange = (e) => {
     setRegisteredStudents(e.target.value);
     if (isInitialized) {
-      await updateFeatures('registered_students');
+      updateFeatures();
     }
   };
 

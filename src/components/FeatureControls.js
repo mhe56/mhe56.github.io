@@ -118,31 +118,34 @@ function FeatureControls({ onReportGenerated }) {
     }
   };
 
-  const handleSocialDistancingToggle = () => {
-    setSocialDistancing(!socialDistancing);
+  const handleSocialDistancingToggle = async () => {
+    const newValue = !socialDistancing;
+    setSocialDistancing(newValue);
     if (isInitialized) {
-      updateFeatures();
+      await updateFeatures();
     }
   };
 
-  const handlePhoneDetectionToggle = () => {
-    setPhoneDetection(!phoneDetection);
+  const handlePhoneDetectionToggle = async () => {
+    const newValue = !phoneDetection;
+    setPhoneDetection(newValue);
     if (isInitialized) {
-      updateFeatures();
+      await updateFeatures();
     }
   };
 
-  const handleAttendanceToggle = () => {
-    setAttendance(!attendance);
+  const handleAttendanceToggle = async () => {
+    const newValue = !attendance;
+    setAttendance(newValue);
     if (isInitialized) {
-      updateFeatures();
+      await updateFeatures();
     }
   };
 
-  const handleRegisteredStudentsChange = (e) => {
+  const handleRegisteredStudentsChange = async (e) => {
     setRegisteredStudents(e.target.value);
     if (isInitialized) {
-      updateFeatures();
+      await updateFeatures();
     }
   };
 

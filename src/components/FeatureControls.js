@@ -9,16 +9,20 @@ function FeatureControls({ onReportGenerated }) {
   const [isLectureActive, setIsLectureActive] = useState(false);
   const [error, setError] = useState('');
 
-  const updateFeatures = async () => {
+  const updateFeatures = async (changedFeature) => {
     if (!isInitialized) return;
     
     try {
+        // Only include the feature that was changed
         const requestData = {
-            phone: phoneDetection,
-            covid: socialDistancing,
-            attendance: attendance,
-            registered_students: registeredStudents ? parseInt(registeredStudents) : 0
+            [changedFeature]: {
+                'phone': phoneDetection,
+                'covid': socialDistancing,
+                'attendance': attendance,
+                'registered_students': registeredStudents ? parseInt(registeredStudents) : 0
+            }[changedFeature]
         };
+        
         console.log('Sending feature update request:', requestData);
         
         const response = await fetch('http://localhost:5000/api/update_features', {
@@ -44,8 +48,14 @@ function FeatureControls({ onReportGenerated }) {
     } catch (error) {
         console.error('Error updating features:', error);
         // Revert the state on error
-        setPhoneDetection(prev => !prev);
-        alert('Failed to update phone detection. Please try again.');
+        if (changedFeature === 'phone') {
+            setPhoneDetection(prev => !prev);
+        } else if (changedFeature === 'covid') {
+            setSocialDistancing(prev => !prev);
+        } else if (changedFeature === 'attendance') {
+            setAttendance(prev => !prev);
+        }
+        alert(`Failed to update ${changedFeature}. Please try again.`);
     }
   };
 
@@ -135,7 +145,7 @@ function FeatureControls({ onReportGenerated }) {
     const newValue = !socialDistancing;
     setSocialDistancing(newValue);
     if (isInitialized) {
-      await updateFeatures();
+      await updateFeatures('covid');
     }
   };
 
@@ -143,7 +153,7 @@ function FeatureControls({ onReportGenerated }) {
     const newValue = !phoneDetection;
     setPhoneDetection(newValue);
     if (isInitialized) {
-      await updateFeatures();
+      await updateFeatures('phone');
     }
   };
 
@@ -151,14 +161,14 @@ function FeatureControls({ onReportGenerated }) {
     const newValue = !attendance;
     setAttendance(newValue);
     if (isInitialized) {
-      await updateFeatures();
+      await updateFeatures('attendance');
     }
   };
 
   const handleRegisteredStudentsChange = async (e) => {
     setRegisteredStudents(e.target.value);
     if (isInitialized) {
-      await updateFeatures();
+      await updateFeatures('registered_students');
     }
   };
 

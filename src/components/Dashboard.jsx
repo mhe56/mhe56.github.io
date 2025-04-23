@@ -147,19 +147,21 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Attendance Status */}
-        <div style={boxStyle}>
-          <FaSmile size={24} color="#4CAF50" />
-          <div>
-            <div style={{ fontSize: '0.9rem', color: '#666' }}>Attendance</div>
-            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
-              {getAttendanceStatus(status.attendance)}
-            </div>
-            <div style={{ fontSize: '0.9rem', color: '#666' }}>
-              {getAttendanceCount(status.attendance)}
+        {/* Attendance Status - Only show when not N/A */}
+        {status.attendance !== 'N/A' && (
+          <div style={boxStyle}>
+            <FaSmile size={24} color="#4CAF50" />
+            <div>
+              <div style={{ fontSize: '0.9rem', color: '#666' }}>Attendance</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
+                {getAttendanceStatus(status.attendance)}
+              </div>
+              <div style={{ fontSize: '0.9rem', color: '#666' }}>
+                {getAttendanceCount(status.attendance)}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* HVAC Status */}
         <div style={boxStyle}>

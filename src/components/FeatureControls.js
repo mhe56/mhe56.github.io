@@ -118,31 +118,131 @@ function FeatureControls({ onReportGenerated }) {
     }
   };
 
-  const handleSocialDistancingToggle = () => {
-    setSocialDistancing(!socialDistancing);
+  const handleSocialDistancingToggle = async () => {
+    const newValue = !socialDistancing;
+    setSocialDistancing(newValue);
     if (isInitialized) {
-      updateFeatures();
+      try {
+        const response = await fetch('http://localhost:5000/api/update_features', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            covid: newValue,
+            phone: phoneDetection,
+            attendance: attendance,
+            registered_students: registeredStudents ? parseInt(registeredStudents) : 0
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to update features');
+        }
+        console.log('Social distancing updated successfully');
+      } catch (err) {
+        setError(err.message);
+        console.error('Error updating social distancing:', err);
+        // Revert the state on error
+        setSocialDistancing(!newValue);
+      }
     }
   };
 
-  const handlePhoneDetectionToggle = () => {
-    setPhoneDetection(!phoneDetection);
+  const handlePhoneDetectionToggle = async () => {
+    const newValue = !phoneDetection;
+    setPhoneDetection(newValue);
     if (isInitialized) {
-      updateFeatures();
+      try {
+        const response = await fetch('http://localhost:5000/api/update_features', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            covid: socialDistancing,
+            phone: newValue,
+            attendance: attendance,
+            registered_students: registeredStudents ? parseInt(registeredStudents) : 0
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to update features');
+        }
+        console.log('Phone detection updated successfully');
+      } catch (err) {
+        setError(err.message);
+        console.error('Error updating phone detection:', err);
+        // Revert the state on error
+        setPhoneDetection(!newValue);
+      }
     }
   };
 
-  const handleAttendanceToggle = () => {
-    setAttendance(!attendance);
+  const handleAttendanceToggle = async () => {
+    const newValue = !attendance;
+    setAttendance(newValue);
     if (isInitialized) {
-      updateFeatures();
+      try {
+        const response = await fetch('http://localhost:5000/api/update_features', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            covid: socialDistancing,
+            phone: phoneDetection,
+            attendance: newValue,
+            registered_students: registeredStudents ? parseInt(registeredStudents) : 0
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to update features');
+        }
+        console.log('Attendance updated successfully');
+      } catch (err) {
+        setError(err.message);
+        console.error('Error updating attendance:', err);
+        // Revert the state on error
+        setAttendance(!newValue);
+      }
     }
   };
 
-  const handleRegisteredStudentsChange = (e) => {
-    setRegisteredStudents(e.target.value);
+  const handleRegisteredStudentsChange = async (e) => {
+    const newValue = e.target.value;
+    setRegisteredStudents(newValue);
     if (isInitialized) {
-      updateFeatures();
+      try {
+        const response = await fetch('http://localhost:5000/api/update_features', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            covid: socialDistancing,
+            phone: phoneDetection,
+            attendance: attendance,
+            registered_students: newValue ? parseInt(newValue) : 0
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to update features');
+        }
+        console.log('Registered students updated successfully');
+      } catch (err) {
+        setError(err.message);
+        console.error('Error updating registered students:', err);
+        // Revert the state on error
+        setRegisteredStudents(e.target.value);
+      }
     }
   };
 
